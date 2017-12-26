@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "colortransition": "^1.0.2",
+    "f-utility": "^3.5.1",
+    "johnny-five": "^0.12.0",
+    "lodash.debounce": "^4.0.8"
+  },
+  "devDependencies": {
+    "debug": "^3.1.0",
+    "xtrace": "^0.1.6"
+  }
+}
