@@ -19,7 +19,7 @@ const board = five.Board()
 const SENSOR_DEBOUNCE_INTERVAL = 50
 const BLINK_SPEED = 100
 const COLOR_SCALE = 4
-const LOW_INTENSITY = 100
+const LOW_INTENSITY = 30
 const COLORS = freeze({
   RED: `#ff0000`,
   TURQUOISE: `#00ccff`,
@@ -83,6 +83,7 @@ const callbackWhenBoardReady = () => {
     }
   }
   const photoCell = new five.Light(`A0`)
+  // const servo = new five.Servo.Continuous(11)
 
   // doesn't seem to work?
   // photoCell.within([0.00, 0.30], function photoCellWithin() {
