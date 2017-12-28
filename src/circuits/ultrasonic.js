@@ -42,20 +42,22 @@ const runFromOneToTwoFast = runFromOneToTwo(300)
 
 board.on(`ready`, function boardReady() {
   let killId = -1
-  let currentColor = `ff0000`
+  let isAlarmy = false
   const light = new five.Led.RGB({ pins: {
     red: 11,
     green: 10,
     blue: 9
   }})
   const magnetSwitch = new five.Switch(2)
-  magnetSwitch.on(`open`, () => {
-    log(`magnet open!`)
+  const alarm = () => {
     clearInterval(killId)
-    light.color(`00ff00`)
-    light.intensity(20)
-    light.strobe(50)
-  })
+    light.stop().off()
+    killId = runFromColorToColor(
+      `#ff0000`, `#0000ff`, 10, (x) => light.color(x)
+    )
+    light.strobe(100)
+  }
+  magnetSwitch.on(`open`, alarm)
   magnetSwitch.on(`close`, () => {
     log(`magnet closed!`)
     light.stop().off()
@@ -67,6 +69,7 @@ board.on(`ready`, function boardReady() {
   })
   let distances = {max: -1, min: 1}
   let scale = 1
+  let closeness = 1
   proximity.on(`data`, function ultrasonic() {
     // log(`Proximity: `)
     // log(`  in  : `, this.in)
@@ -78,9 +81,13 @@ board.on(`ready`, function boardReady() {
       distances.min = this.cm
     }
     // log(`  current  : `, this.cm, distances)
-    log(`  current  : `, this.cm, distances, scale, scale * 100)
+    // log(`  current  : `, this.cm, distances, scale, scale * 100)
     scale = this.cm / distances.max
-    light.intensity(Math.abs((100 * scale) - 10))
+    closeness = Math.abs((100 * scale) - 10)
+    light.intensity(closeness)
+    if (closeness < 8) {
+      light.stop().off()
+    }
   })
   const animate = () => {
     clearInterval(killId)
