@@ -1,12 +1,43 @@
 import {
+  fromPairs,
+  toPairs,
   map,
-  freeze,
   curry
 } from 'f-utility'
 import five from 'johnny-five'
 import _color from 'colortransition'
 import _debounce from 'lodash.debounce'
+import F from 'fluture'
 import bug from 'debug'
+import {COLORS} from '../light'
+const {MAGENTA, CYAN} = COLORS
+
+const of = curry((C, x) => new C(x))
+const 𝓯 = of(F)
+const bind = curry((scope, x) => x.bind(scope))
+const log = bind(console, console.log)
+
+/*
+import five from 'johnny-five'
+const board = five.Board()
+// what you'll tend to see:
+board.on(`event`, someCallbackFunction)
+// what this does:
+eventF(`event`, someCallbackFunction, board)
+eventF(`event`, someCallbackFunction)(board)
+eventF(`event`)(someCallbackFunction)(board)
+eventF(`event`)(someCallbackFunction, board)
+ */
+// const eventF = curry((eventName, handler, entity) => 𝓯(
+//   function eventAsFuture(reject, resolve) {
+//     entity.on(eventName, handler(reject, resolve))
+//   }
+// ))
+// const eventKeysF = curry((entity, rules) => pipe(
+//   toPairs,
+//   map(([k, v]) => eventF(k, v, entity)),
+//   fromPairs
+// )(rules))
 
 const color = curry(_color)
 const debounce = curry((amount, fn) => _debounce(fn, amount))
@@ -26,12 +57,7 @@ const SENSOR_DEBOUNCE_INTERVAL = 50
 // const BLINK_SPEED = 100
 const COLOR_SCALE = 4
 const LOW_INTENSITY = 30
-const COLORS = freeze({
-  RED: `#ff0000`,
-  TURQUOISE: `#00ccff`,
-  MAGENTA: `#ff0088`
-})
-// express this with sine!
+
 const runFromColorToColor = curry(
   (start, end, intervalInMs, cb) => {
     const changeColorByPercentage = color(start, end)
@@ -55,7 +81,8 @@ const runFromColorToColor = curry(
     }, intervalInMs)
   }
 )
-const runFromOneToTwo = runFromColorToColor(COLORS.MAGENTA, COLORS.TURQUOISE)
+
+const runFromOneToTwo = runFromColorToColor(MAGENTA, CYAN)
 const runFromOneToTwoFast = runFromOneToTwo(300)
 
 const callbackWhenBoardReady = () => {
@@ -118,6 +145,7 @@ const callbackWhenBoardReady = () => {
   const delaySensor = debounce(SENSOR_DEBOUNCE_INTERVAL)
   photoCell.on(`change`, delaySensor(photoCellChange))
   const button = new five.Button(2)
+  // const buttonEvents = eventKeysF()
 
   // Initialize the RGB LED
   const led = new five.Led.RGB({
@@ -153,5 +181,4 @@ const callbackWhenBoardReady = () => {
     photoCell
   })
 }
-
 board.on(`ready`, callbackWhenBoardReady)

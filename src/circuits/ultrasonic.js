@@ -1,7 +1,7 @@
 const five = require(`johnny-five`)
 const {curry} = require(`f-utility`)
 const board = new five.Board()
-const _debounce = require('lodash.debounce')
+const _debounce = require(`lodash.debounce`)
 // _debounce(fn, amount)
 const debounce = curry((amount, fn) => _debounce(fn, amount))
 
