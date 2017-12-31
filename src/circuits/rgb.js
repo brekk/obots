@@ -1,46 +1,21 @@
 import {
-  fromPairs,
-  toPairs,
+  // fromPairs,
+  // toPairs,
   map,
-  curry
+  curry,
+  K
 } from 'f-utility'
 import five from 'johnny-five'
-import _color from 'colortransition'
-import _debounce from 'lodash.debounce'
-import F from 'fluture'
+// import F from 'fluture'
 import bug from 'debug'
-import {COLORS} from '../light'
+import {COLORS, colorSequence} from '../light'
+import {debounce} from '../util/debounce'
 const {MAGENTA, CYAN} = COLORS
 
-const of = curry((C, x) => new C(x))
-const 𝓯 = of(F)
-const bind = curry((scope, x) => x.bind(scope))
-const log = bind(console, console.log)
-
-/*
-import five from 'johnny-five'
-const board = five.Board()
-// what you'll tend to see:
-board.on(`event`, someCallbackFunction)
-// what this does:
-eventF(`event`, someCallbackFunction, board)
-eventF(`event`, someCallbackFunction)(board)
-eventF(`event`)(someCallbackFunction)(board)
-eventF(`event`)(someCallbackFunction, board)
- */
-// const eventF = curry((eventName, handler, entity) => 𝓯(
-//   function eventAsFuture(reject, resolve) {
-//     entity.on(eventName, handler(reject, resolve))
-//   }
-// ))
-// const eventKeysF = curry((entity, rules) => pipe(
-//   toPairs,
-//   map(([k, v]) => eventF(k, v, entity)),
-//   fromPairs
-// )(rules))
-
-const color = curry(_color)
-const debounce = curry((amount, fn) => _debounce(fn, amount))
+// const of = curry((C, x) => new C(x))
+// const 𝓯 = of(F)
+// const bind = curry((scope, x) => x.bind(scope))
+// const log = bind(console, console.log)
 
 const [
   photoCellLog,
@@ -56,34 +31,15 @@ const board = five.Board()
 const SENSOR_DEBOUNCE_INTERVAL = 50
 // const BLINK_SPEED = 100
 const COLOR_SCALE = 4
-const LOW_INTENSITY = 30
+const LOW_INTENSITY = 20
 
-const runFromColorToColor = curry(
-  (start, end, intervalInMs, cb) => {
-    const changeColorByPercentage = color(start, end)
-    let count = 0
-    let counter = COLOR_SCALE
-    const THE_LIMIT = 100
-    return setInterval(() => {
-      lightLog(`counting! ${count} + ${counter}`, count + counter)
-      count += counter
-      if (count > THE_LIMIT || count <= 0) {
-        counter *= -1
-      }
-      if (count <= 0) {
-        count = 0
-      }
-      if (count >= THE_LIMIT) {
-        count = THE_LIMIT
-      }
-      // count %= THE_LIMIT
-      cb(changeColorByPercentage(count))
-    }, intervalInMs)
-  }
-)
+// colorSequence(({scale, colors, interval, cb, limit = 100}) => {})
 
-const runFromOneToTwo = runFromColorToColor(MAGENTA, CYAN)
-const runFromOneToTwoFast = runFromOneToTwo(300)
+const magentaCyanSequence = colorSequence({
+  scale: COLOR_SCALE,
+  interval: 300,
+  colors: [MAGENTA, CYAN]
+})
 
 const callbackWhenBoardReady = () => {
   // if off
@@ -104,39 +60,42 @@ const callbackWhenBoardReady = () => {
       led.color(COLORS.MAGENTA)
       led.intensity(LOW_INTENSITY)
       isOn = true
-      killId = runFromOneToTwoFast((newColor) => {
-        led.color(newColor)
-        led.intensity(LOW_INTENSITY)
+      killId = magentaCyanSequence({
+        cb: (newColor) => {
+          led.color(newColor)
+          led.intensity(LOW_INTENSITY)
+        }
       })
     }
   }
   const killTheLight = () => {
     if (willDie) {
-      led.off()
+      led.stop().off()
       clearInterval(killId)
       willDie = false
       isOn = false
     }
   }
   const photoCell = new five.Light(`A0`)
-  // const servo = new five.Servo.Continuous(11)
 
   // doesn't seem to work?
   // photoCell.within([0.00, 0.30], function photoCellWithin() {
-  //   // console.log(`specifically, 0 - 0.3`)
+  //   console.log(`specifically, 0 - 0.3`)
   // })
   function photoCellChange() {
     const {level} = this
-    if (level > 0.85) {
+    if (level >= 0.80) {
       photoCellLog(`NO LIGHT!`, Date.now())
       if (!isOn) {
         startLightLoop()
       } else {
-        if (!isStrobing) {
-          led.strobe(300)
-          isStrobing = true
-        } else {
+        // if (!isStrobing) {
+        // led.strobe(300)
+        // isStrobing = true
+        // } else {
+        if (isStrobing) {
           led.stop()
+          clearInterval(killId)
           isStrobing = false
         }
       }
@@ -145,7 +104,6 @@ const callbackWhenBoardReady = () => {
   const delaySensor = debounce(SENSOR_DEBOUNCE_INTERVAL)
   photoCell.on(`change`, delaySensor(photoCellChange))
   const button = new five.Button(2)
-  // const buttonEvents = eventKeysF()
 
   // Initialize the RGB LED
   const led = new five.Led.RGB({

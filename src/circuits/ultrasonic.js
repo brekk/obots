@@ -1,14 +1,16 @@
+import five from 'johnny-five'
 import _color from 'colortransition'
+import {curry} from 'f-utility'
 import {COLORS} from '../light'
-const five = require(`johnny-five`)
-const {curry} = require(`f-utility`)
-const board = new five.Board()
-const _debounce = require(`lodash.debounce`)
-// _debounce(fn, amount)
 const {MAGENTA, CYAN} = COLORS
-const debounce = curry((amount, fn) => _debounce(fn, amount))
+const board = new five.Board()
+// const _debounce = require(`lodash.debounce`)
+// _debounce(fn, amount)
+// const debounce = curry(
+//   (amount, fn) => _debounce(fn, amount)
+// )
 
-const sensorDelay = debounce(200)
+// const sensorDelay = debounce(200)
 const log = console.log.bind(console)
 
 const COLOR_SCALE = 4
@@ -42,7 +44,6 @@ const runFromOneToTwoFast = runFromOneToTwo(300)
 
 board.on(`ready`, function boardReady() {
   let killId = -1
-  let isAlarmy = false
   const light = new five.Led.RGB({ pins: {
     red: 11,
     green: 10,

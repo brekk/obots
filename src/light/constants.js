@@ -14,3 +14,4 @@ const colors = {
   PURPLE: `#6600ff`
 }
 export const COLORS = Object.freeze(colors)
+export const LOGGER_NAMESPACE = `obots:light`
