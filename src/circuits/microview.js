@@ -1,21 +1,17 @@
-import five from 'johnny-five'
-import Oled from 'oled-js'
-import pingu from 'png-to-lcd'
-const board = five.Board()
+const five = require(`johnny-five`)
+const board = new five.Board()
+const Oled = require(`oled-js`)
 
-board.on(`ready`, function boardRead() {
-  console.log(`connected to microview!`)
-  const oled = new Oled(board, five, {
+board.on(`ready`, function ready() {
+  console.log(`Connected to Arduino, ready.`)
+
+  let opts = {
     width: 64,
     height: 48,
     microview: true
-  })
-  oled.clearDisplay()
-  pingu(`./human-bird.png`, true, (x, bitmap) => {
-    if (x) {
-      throw x
-    }
-    oled.buffer = bitmap
-    oled.update()
-  })
+  }
+
+  const oled = new Oled(board, five, opts)
+  // do cool oled things here
+  this.repl.inject({ oled })
 })

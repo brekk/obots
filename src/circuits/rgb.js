@@ -8,7 +8,7 @@ import {
 import five from 'johnny-five'
 // import F from 'fluture'
 import bug from 'debug'
-import {COLORS, colorSequence} from '../light'
+import {Button, Led, COLORS, colorSequence} from '../light'
 import {debounce} from '../util/debounce'
 const {MAGENTA, CYAN} = COLORS
 
@@ -42,14 +42,6 @@ const magentaCyanSequence = colorSequence({
 })
 
 const callbackWhenBoardReady = () => {
-  // if off
-  //   up turns on and sets color
-  //   down does nothing
-  //   hold does nothing
-  // if on
-  //   up changes color
-  //   down does nothing
-  //   hold turns off
   let isOn = false
   let willDie = false
   let killId = null
@@ -68,7 +60,12 @@ const callbackWhenBoardReady = () => {
       })
     }
   }
-  const killTheLight = () => {
+  const startDying = () => {
+    if (!willDie) {
+      willDie = true
+    }
+  }
+  const die = () => {
     if (willDie) {
       led.stop().off()
       clearInterval(killId)
@@ -103,34 +100,21 @@ const callbackWhenBoardReady = () => {
   }
   const delaySensor = debounce(SENSOR_DEBOUNCE_INTERVAL)
   photoCell.on(`change`, delaySensor(photoCellChange))
-  const button = new five.Button(2)
 
   // Initialize the RGB LED
-  const led = new five.Led.RGB({
-    pins: {
-      red: 6,
-      green: 5,
-      blue: 3
-    }
+  const led = Led.of({
+    r: 6,
+    g: 5,
+    b: 3
   })
 
-  // Turn it on and set the initial color
-  // led.on()
-  // 00 - FF
-  // 9abcdef
-  // #RRGGBB
-  // #F0F
-  // #FF00FF
+  const button = Button.of(2)
 
   button.on(`down`, startLightLoop)
 
-  button.on(`hold`, () => {
-    if (!willDie) {
-      willDie = true
-    }
-  })
+  button.on(`hold`, startDying)
 
-  button.on(`up`, killTheLight)
+  button.on(`up`, die)
 
   // Add led to REPL (optional)
   board.repl.inject({
