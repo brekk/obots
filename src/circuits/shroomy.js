@@ -1,9 +1,9 @@
 import five from 'johnny-five'
+import {K} from 'f-utility'
 import {
   e0
 } from 'entrust'
 import {COLORS} from '../light'
-const K = (x) => () => x
 // import {
 //   isNumber,
 //   map,

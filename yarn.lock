@@ -1637,9 +1637,9 @@ browser-resolve@^1.11.0, browser-resolve@^1.11.2, browser-resolve@^1.7.0:
   dependencies:
     resolve "1.1.7"
 
-"browser-serialport@git://github.com/noopkat/browser-serialport.git#api-updates":
+"browser-serialport@git://github.com/noopkat/browser-serialport#api-updates":
   version "2.0.3"
-  resolved "git://github.com/noopkat/browser-serialport.git#a1cecbee1276bfe78b0491f8d13544c70859ff36"
+  resolved "git://github.com/noopkat/browser-serialport#a1cecbee1276bfe78b0491f8d13544c70859ff36"
 
 browser-serialport@latest:
   version "2.1.0"
@@ -6875,9 +6875,9 @@ stk500-v2@^1.0.1:
     async "^0.9.0"
     buffer-equal "0.0.1"
 
-"stk500@git://github.com/noopkat/js-stk500v1.git#avrgirl":
+"stk500@git://github.com/noopkat/js-stk500v1#avrgirl":
   version "1.0.4"
-  resolved "git://github.com/noopkat/js-stk500v1.git#e116a1f72abdafc7d57eb0ee58221556d2b5def4"
+  resolved "git://github.com/noopkat/js-stk500v1#e116a1f72abdafc7d57eb0ee58221556d2b5def4"
   dependencies:
     async "^0.9.0"
     buffer-equal "0.0.1"

@@ -19,6 +19,7 @@ export const Led = {
       if (red && green && blue) {
         return rgb({ pins: {red, green, blue} })
       }
+      return rgb(x)
     }
   }
 }
